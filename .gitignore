@@ -1,0 +1,19 @@
+# secrets
+.env
+*.pem
+*.key
+# backend
+backend/target/
+*.class
+.idea/
+*.iml
+# frontend
+frontend/node_modules/
+frontend/dist/
+# analytics
+analytics-service/.venv/
+__pycache__/
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/

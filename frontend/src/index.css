@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design tokens. RGB channels so Tailwind opacity modifiers work. */
+:root[data-theme="dark"] {
+  --bg: 7 12 22;           /* deeper cyber navy */
+  --surface: 13 22 38;     /* dark panel */
+  --raised: 19 32 54;      /* hover / elevated */
+  --line: 30 46 72;
+  --ink: 232 238 248;
+  --muted: 130 148 174;
+  --accent: 34 211 238;    /* neon cyan */
+  --accent-ink: 5 18 26;
+  --sev-critical: 239 68 68;
+  --sev-high: 249 115 22;
+  --sev-medium: 234 179 8;
+  --sev-low: 34 197 94;
+  --sev-info: 100 116 139;
+  --ok: 34 197 94;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg: 243 246 251;
+  --surface: 255 255 255;
+  --raised: 236 241 248;
+  --line: 214 223 236;
+  --ink: 15 23 42;
+  --muted: 88 104 128;
+  --accent: 8 126 164;
+  --accent-ink: 255 255 255;
+  --sev-critical: 220 38 38;
+  --sev-high: 234 88 12;
+  --sev-medium: 202 138 4;
+  --sev-low: 22 163 74;
+  --sev-info: 71 85 105;
+  --ok: 22 163 74;
+  color-scheme: light;
+}
+
+body {
+  @apply bg-bg text-ink font-sans antialiased;
+  background-image: radial-gradient(circle at 50% 0%, rgba(34, 211, 238, 0.03) 0%, transparent 60%);
+  background-attachment: fixed;
+}
+
+:focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* Cyber glow utilities */
+.glow-accent {
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.25);
+}
+.glow-critical {
+  box-shadow: 0 0 18px rgba(239, 68, 68, 0.35);
+}
+.glow-ok {
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.25);
+}
+.glow-amber {
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.25);
+}
+
+/* Subtle grid backdrop for visual cyber network feel */
+.cyber-grid {
+  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
+
+/* Custom scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(var(--line));
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--muted));
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2.5s infinite ease-in-out;
+}
