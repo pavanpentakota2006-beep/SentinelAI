@@ -111,19 +111,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [hourlyMetrics, setHourlyMetrics] = useState(HOURLY_METRICS);
   const [lastSimulatedEvent, setLastSimulatedEvent] = useState<SecurityEvent | null>(null);
 
-  // Live simulator generator
+  // Real-time Event Streaming (SSE with Intelligent Fallback)
   useEffect(() => {
     if (!isSimulatorRunning) return;
 
-    const interval = setInterval(() => {
-      const template = SIMULATED_TEMPLATES[Math.floor(Math.random() * SIMULATED_TEMPLATES.length)];
-      const now = new Date();
-      const timeStr = now.toISOString().replace("T", " ").substring(0, 19);
-      const newId = `EVT-${Math.floor(8950 + Math.random() * 1000)}`;
+    let sseActive = false;
+    let eventSource: EventSource | null = null;
+    let fallbackInterval: NodeJS.Timeout | null = null;
 
+    const pushTelemetry = (template: (typeof SIMULATED_TEMPLATES)[0], timeStr: string, id: string) => {
       const newEvent: SecurityEvent = {
         ...template,
-        id: newId,
+        id,
         timestamp: timeStr,
         dedupeHash: Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2),
       };
@@ -159,9 +158,74 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         last.events += 1;
         return [...prev.slice(0, prev.length - 1), last];
       });
-    }, 3200);
+    };
 
-    return () => clearInterval(interval);
+    const startLocalFallback = () => {
+      if (fallbackInterval) return;
+      fallbackInterval = setInterval(() => {
+        const template = SIMULATED_TEMPLATES[Math.floor(Math.random() * SIMULATED_TEMPLATES.length)];
+        const now = new Date();
+        const timeStr = now.toISOString().replace("T", " ").substring(0, 19);
+        const newId = `EVT-${Math.floor(8950 + Math.random() * 1000)}`;
+        pushTelemetry(template, timeStr, newId);
+      }, 3200);
+    };
+
+    if (typeof window !== "undefined" && "EventSource" in window) {
+      try {
+        eventSource = new EventSource("/api/v1/events/stream");
+
+        eventSource.addEventListener("SECURITY_EVENT", (e) => {
+          sseActive = true;
+          if (fallbackInterval) {
+            clearInterval(fallbackInterval);
+            fallbackInterval = null;
+          }
+          try {
+            const raw = JSON.parse(e.data);
+            const template: (typeof SIMULATED_TEMPLATES)[0] = {
+              eventType: raw.eventType || "NET_CONN",
+              severity: raw.severity || "medium",
+              srcIp: raw.srcIp || "10.0.1.20",
+              dstIp: raw.dstIp || "10.0.2.50",
+              asset: "srv-core",
+              user: "system",
+              message: raw.message || "Live SSE Security Telemetry Ingested",
+              raw: raw,
+              isSynthetic: raw.synthetic ?? true,
+            };
+            const timeStr = raw.occurredAt
+              ? new Date(raw.occurredAt).toISOString().replace("T", " ").substring(0, 19)
+              : new Date().toISOString().replace("T", " ").substring(0, 19);
+            pushTelemetry(template, timeStr, `EVT-${raw.id ? raw.id.toString().substring(0, 8) : Date.now()}`);
+          } catch {
+            // Fallback gracefully on parsing anomaly
+          }
+        });
+
+        eventSource.onerror = () => {
+          if (!sseActive) {
+            startLocalFallback();
+          }
+        };
+      } catch {
+        startLocalFallback();
+      }
+    } else {
+      startLocalFallback();
+    }
+
+    const initialTimer = setTimeout(() => {
+      if (!sseActive) {
+        startLocalFallback();
+      }
+    }, 1500);
+
+    return () => {
+      clearTimeout(initialTimer);
+      if (fallbackInterval) clearInterval(fallbackInterval);
+      if (eventSource) eventSource.close();
+    };
   }, [isSimulatorRunning]);
 
   const toggleSimulator = () => {

@@ -1,5 +1,10 @@
 import unittest
-from main import health, predict_anomaly, predict_batch, TelemetryFeature, BatchTelemetryRequest, model
+from sklearn.ensemble import IsolationForest
+from main import (
+    health, predict_anomaly, predict_batch, retrain_model, get_analytics_metrics,
+    TelemetryFeature, BatchTelemetryRequest, RetrainRequest, model
+)
+from fastapi import HTTPException
 
 class TestAnalyticsService(unittest.TestCase):
 
@@ -57,5 +62,45 @@ class TestAnalyticsService(unittest.TestCase):
         self.assertFalse(results[0].is_anomaly)
         self.assertTrue(results[1].is_anomaly)
 
+    def test_analytics_metrics_tracking(self):
+        # Trigger an inference first to test metrics accumulation
+        feature = TelemetryFeature(bytes_in=500.0, bytes_out=1000.0, duration_ms=40.0, failed_attempts=0, port_entropy=1.0)
+        predict_anomaly(feature)
+        metrics = get_analytics_metrics()
+        self.assertGreaterEqual(metrics.total_inferences, 1)
+        self.assertIn("1.2.0", metrics.model_version)
+
+    def test_model_retraining(self):
+        global model
+        samples = [
+            TelemetryFeature(bytes_in=500.0 + i * 50, bytes_out=1000.0 + i * 100, duration_ms=30.0 + i * 5, failed_attempts=0, port_entropy=1.0)
+            for i in range(12)
+        ]
+        retrain_req = RetrainRequest(samples=samples, contamination=0.1, n_estimators=50)
+        res = retrain_model(retrain_req)
+        self.assertEqual(res.status, "success")
+        self.assertEqual(res.samples_ingested, 12)
+        self.assertEqual(res.estimators, 50)
+        self.assertGreater(res.training_duration_ms, 0)
+
+        # Restore baseline model to avoid polluting subsequent tests
+        from main import baseline_data
+        baseline_model = IsolationForest(n_estimators=100, contamination=0.1, random_state=42)
+        baseline_model.fit(baseline_data)
+        import main
+        main.model = baseline_model
+
+    def test_model_retraining_insufficient_samples(self):
+        samples = [
+            TelemetryFeature(bytes_in=500.0, bytes_out=1000.0, duration_ms=30.0, failed_attempts=0, port_entropy=1.0)
+            for _ in range(2)
+        ]
+        retrain_req = RetrainRequest(samples=samples)
+        with self.assertRaises(HTTPException) as ctx:
+            retrain_model(retrain_req)
+        self.assertEqual(ctx.exception.status_code, 400)
+
+
 if __name__ == "__main__":
     unittest.main()
+

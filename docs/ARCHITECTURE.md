@@ -57,14 +57,16 @@ sentinelx-ai/
 │   │   ├── components/       # CommandPalette (Cmd+K), SVG gauges, network topology, war room consoles
 │   │   ├── layout/           # AppShell with mobile drawer & Command Palette
 │   │   ├── lib/              # StoreProvider, live event simulator, theme engine, PDF export
-│   │   └── test/             # Vitest & React Testing Library test suites
+│   │   └── test/             # Vitest & React Testing Library test suites (10 tests)
 │   └── public/images/        # Reference surveillance captures and threat telemetry visual assets
 ├── analytics-service/        # FastAPI Python microservice executing Isolation Forest ML model
-│   ├── main.py               # Endpoints: /health, /api/v1/predict, /api/v1/predict/batch
+│   ├── main.py               # Endpoints: /health, /api/v1/predict, /api/v1/predict/batch, /api/v1/retrain, /api/v1/metrics
+│   ├── test_main.py          # Unit test suite covering inference, batching, MLOps retraining & metrics (8 tests)
 │   ├── requirements.txt      # scikit-learn, fastapi, uvicorn, numpy, pydantic
 │   └── Dockerfile            # Python 3.11-slim container
 ├── docs/                     # System architecture and API documentation
 └── docker-compose.yml        # Multi-container orchestration (postgres, redis, analytics, backend, frontend)
+
 ```
 
 ---
