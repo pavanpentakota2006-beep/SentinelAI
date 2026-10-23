@@ -11,6 +11,7 @@ backend/target/
 frontend/node_modules/
 frontend/dist/
 # analytics
+.venv/
 analytics-service/.venv/
 __pycache__/
 # os / editor

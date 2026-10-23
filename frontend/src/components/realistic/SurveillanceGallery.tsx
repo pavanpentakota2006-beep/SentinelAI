@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Eye, Maximize2, X, Shield, Camera, ExternalLink, Radio, Play } from "lucide-react";
+import { Eye, Maximize2, X, Shield, Camera, ExternalLink, Radio, Play, CheckCircle2, Zap } from "lucide-react";
 import { useToast } from "@/lib/toast";
 import clsx from "clsx";
 
@@ -19,45 +18,45 @@ export interface SurveillanceFeed {
 export const SURVEILLANCE_FEEDS: SurveillanceFeed[] = [
   {
     id: "feed-1",
-    title: "Global SOC Incident Management Console",
-    subtitle: "Network topology, attack paths, and AI correlation engine",
-    category: "Incident Operations",
-    src: "/images/soc_incidents_management.jpg",
-    badge: "INC-2847 ACTIVE",
-    description: "Multi-layered network infrastructure topology highlighting active lateral movement from perimeter firewall to database cluster with automated AI triage summary.",
+    title: "Executive Panoramic SOC Video Wall & Cyber Threat Matrix",
+    subtitle: "Real-time global threat arcs, multi-screen telemetry, and blocked threats",
+    category: "Global Operations",
+    src: "/images/soc_global_surveillance_wall.jpg",
+    badge: "GLOBAL SOC 24/7",
+    description: "Panoramic multi-display cyber threat world map tracking live ingress trajectories, network traffic waveforms, and blocked threats with 24/7 physical operations bridge.",
+    route: "/",
+    workspaceName: "Executive Command Center",
+  },
+  {
+    id: "feed-2",
+    title: "CyCarrier APT Situation Graph & Forensic Process Timeline",
+    subtitle: "Entity correlation graph, endpoint timeline, and threat radar",
+    category: "Incident Forensics",
+    src: "/images/cycarrier_apt_situation_graph.jpg",
+    badge: "APT CASE ACTIVE",
+    description: "Multi-layered situation graph detailing Server-HWA, Server-DONALD, and endpoint connections alongside chronologically executed processes (powershell.exe, whoami.exe).",
     route: "/incidents",
     workspaceName: "Incidents Management",
   },
   {
-    id: "feed-2",
-    title: "Global Threat Intelligence & Attack Geo-Vector Radar",
-    subtitle: "Cross-border attack trajectories and severity distribution",
+    id: "feed-3",
+    title: "OpenCTI Threat Intelligence & Observables Platform",
+    subtitle: "Intrusion sets, malware polar distribution, and CVE tracking",
     category: "Threat Intelligence",
-    src: "/images/threat_intelligence_map.jpg",
-    badge: "12,345 THREATS",
-    description: "Live global geospatial threat map tracking active DDoS, XSS, and malware campaigns across international subnets with multi-ring asset exposure analysis.",
+    src: "/images/opencti_threat_intelligence.jpg",
+    badge: "137.9K INDICATORS",
+    description: "Structured cyber threat intelligence tracking 503 intrusion sets (APT29, Lazarus), 2K malware strains, CVE vulnerabilities, and targeted geopolitical regions.",
     route: "/threat-intel",
     workspaceName: "Threat Intelligence",
   },
   {
-    id: "feed-3",
-    title: "Deep Cyber Health & 3D Network Traffic Matrix",
-    subtitle: "Threat severity gauges, timeline milestones, and traffic planes",
-    category: "Security Telemetry",
-    src: "/images/cyber_health_radar.jpg",
-    badge: "SYSTEM HEALTH 92%",
-    description: "3D perspective traffic grid mapping communication between internal networks and external malicious IPs alongside dual-arc severity speedometer gauges.",
-    route: "/",
-    workspaceName: "Overview Command Center",
-  },
-  {
     id: "feed-4",
-    title: "Threat Ingress & Subnet Reconnaissance Grid",
-    subtitle: "Threat actor attribution, radar polygons, and PCAP analysis",
+    title: "Vehere MITRE ATT&CK & Ingress Perimeter Hunt",
+    subtitle: "14-stage kill-chain stepper, anomaly waveforms, and top offender risk table",
     category: "Active Defense",
-    src: "/images/interceptor_threat_hunt.jpg",
-    badge: "4,500 DETECTIONS",
-    description: "Sensor grid monitoring threat actor origin IPs, ASNs, and DDoS campaigns with deep-packet inspection and multi-attribute risk radar.",
+    src: "/images/mitre_attack_alert_matrix.jpg",
+    badge: "235K ALERTS",
+    description: "Deep sensor grid mapping alerts directly to the MITRE ATT&CK matrix alongside real-time anomaly trend waveforms and high-risk offender IP telemetry.",
     route: "/alerts",
     workspaceName: "Alerts & Interceptor",
   },
@@ -75,16 +74,17 @@ export const SURVEILLANCE_FEEDS: SurveillanceFeed[] = [
 ];
 
 export function SurveillanceGallery() {
-  const navigate = useNavigate();
   const { showToast } = useToast();
   const [selectedFeed, setSelectedFeed] = useState<SurveillanceFeed | null>(null);
+  const [activeFeedId, setActiveFeedId] = useState<string>(SURVEILLANCE_FEEDS[0].id);
 
-  const handleLaunchWorkspace = (feed: SurveillanceFeed) => {
-    navigate(feed.route);
+  const handleSelectFeedInPlace = (feed: SurveillanceFeed) => {
+    setActiveFeedId(feed.id);
+    setSelectedFeed(feed);
     showToast({
       type: "info",
-      title: `Workspace Launched: ${feed.workspaceName}`,
-      message: `Switched to active operational module at ${feed.route}`,
+      title: `Inspecting Feed: ${feed.workspaceName}`,
+      message: `Operational intelligence loaded directly in-place.`,
     });
   };
 
@@ -99,7 +99,7 @@ export function SurveillanceGallery() {
           <div>
             <h3 className="text-sm font-bold text-ink">The 5 Core Operational Security Command Feeds</h3>
             <p className="text-[11px] text-muted">
-              Click any feed image to immediately launch and work in that active operational workspace
+              Tap any feed image to inspect details and execute operations directly in place
             </p>
           </div>
         </div>
@@ -116,8 +116,11 @@ export function SurveillanceGallery() {
         {SURVEILLANCE_FEEDS.map((feed, idx) => (
           <div
             key={feed.id}
-            onClick={() => handleLaunchWorkspace(feed)}
-            className="group cursor-pointer rounded-chip border border-line bg-bg/80 overflow-hidden hover:border-accent hover:shadow-lg transition-all flex flex-col justify-between"
+            onClick={() => handleSelectFeedInPlace(feed)}
+            className={clsx(
+              "group cursor-pointer rounded-chip border bg-bg/80 overflow-hidden transition-all flex flex-col justify-between",
+              activeFeedId === feed.id ? "border-accent ring-1 ring-accent/40 shadow-md" : "border-line hover:border-accent hover:shadow-lg"
+            )}
           >
             {/* Image Preview Container */}
             <div className="relative aspect-video w-full overflow-hidden bg-black">
@@ -133,16 +136,16 @@ export function SurveillanceGallery() {
                 {feed.badge}
               </span>
 
-              {/* Hover overlay with clear action */}
+              {/* Hover overlay with in-place action */}
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-xs">
                 <span className="px-3 py-1.5 rounded-chip bg-accent text-accent-ink font-bold text-xs shadow-md flex items-center gap-1.5">
-                  <Play size={12} fill="currentColor" /> Click to Launch Workspace
+                  <Maximize2 size={12} /> Tap to Inspect in Place
                 </span>
               </div>
 
               <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between text-[11px] font-mono text-white/90">
                 <span className="truncate font-semibold">{feed.category}</span>
-                <span className="text-[10px] text-accent font-bold">Feed #{idx + 1} &rarr; {feed.route}</span>
+                <span className="text-[10px] text-accent font-bold">CAM 0{idx + 1}</span>
               </div>
             </div>
 
@@ -158,23 +161,17 @@ export function SurveillanceGallery() {
               </div>
 
               <div className="pt-2 border-t border-line/60 flex items-center justify-between text-[10px] font-mono">
-                <span className="text-muted">Target: {feed.workspaceName}</span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedFeed(feed);
-                  }}
-                  className="text-accent hover:underline flex items-center gap-1"
-                >
-                  <Maximize2 size={11} /> Expand Preview
-                </button>
+                <span className="text-muted">Console: {feed.workspaceName}</span>
+                <span className="text-accent hover:underline flex items-center gap-1 font-semibold">
+                  <Maximize2 size={11} /> Inspect Details
+                </span>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Modal Lightbox for Full-Resolution Inspection */}
+      {/* Modal Lightbox for In-Place Full-Resolution & Telemetry Inspection */}
       {selectedFeed && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md animate-fadeIn">
           <div className="w-full max-w-5xl rounded-card border border-line bg-surface p-4 shadow-2xl space-y-3 max-h-[90vh] flex flex-col">
@@ -188,7 +185,7 @@ export function SurveillanceGallery() {
               </div>
               <button
                 onClick={() => setSelectedFeed(null)}
-                className="rounded-chip p-1 text-muted hover:bg-raised hover:text-ink"
+                className="rounded-chip p-1 text-muted hover:bg-raised hover:text-ink cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -209,20 +206,22 @@ export function SurveillanceGallery() {
               </p>
               <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
                 <button
-                  onClick={() => setSelectedFeed(null)}
-                  className="px-3 py-1.5 rounded-chip border border-line bg-surface text-ink text-xs font-semibold hover:bg-raised transition-colors"
+                  onClick={() => {
+                    showToast({
+                      type: "success",
+                      title: "In-Place Containment Vector Triggered",
+                      message: `Telemetry sensor synchronized with ${selectedFeed.workspaceName}.`,
+                    });
+                  }}
+                  className="px-3 py-1.5 rounded-chip bg-accent/20 border border-accent/40 text-accent font-bold text-xs hover:bg-accent/30 transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
-                  Close
+                  <Zap size={12} fill="currentColor" /> Synchronize Telemetry
                 </button>
                 <button
-                  onClick={() => {
-                    const target = selectedFeed;
-                    setSelectedFeed(null);
-                    handleLaunchWorkspace(target);
-                  }}
-                  className="px-4 py-1.5 rounded-chip bg-accent text-accent-ink font-bold text-xs hover:bg-accent/90 transition-colors flex items-center gap-1.5 shadow-md"
+                  onClick={() => setSelectedFeed(null)}
+                  className="px-4 py-1.5 rounded-chip bg-accent text-accent-ink font-bold text-xs hover:bg-accent/90 transition-colors flex items-center gap-1.5 shadow-md cursor-pointer"
                 >
-                  <Play size={12} fill="currentColor" /> Launch Active Working Dashboard &rarr;
+                  Close Inspection
                 </button>
               </div>
             </div>

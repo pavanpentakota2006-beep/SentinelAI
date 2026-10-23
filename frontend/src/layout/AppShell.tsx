@@ -1,47 +1,60 @@
-import { Moon, Play, Pause, Radio, Search, Sun, Bell, Shield, Terminal } from "lucide-react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import {
+  Moon,
+  Play,
+  Pause,
+  Radio,
+  Search,
+  Sun,
+  Bell,
+  Shield,
+  Menu,
+  X,
+  Command
+} from "lucide-react";
+import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import clsx from "clsx";
 import { NAV } from "@/nav";
 import { useTheme } from "@/lib/theme";
 import { useStore } from "@/lib/store";
 import { DemoTag } from "@/components/ui";
-
 import { SentinelLogo } from "@/components/SentinelLogo";
+import { CommandPalette } from "@/components/CommandPalette";
 
 const GROUPS = [...new Set(NAV.map((n) => n.group))];
 
 export default function AppShell() {
   const { theme, toggle } = useTheme();
   const { isSimulatorRunning, toggleSimulator, alerts, incidents, lastSimulatedEvent } = useStore();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const openAlertsCount = alerts.filter((a) => a.status === "open").length;
   const activeIncidentsCount = incidents.filter((i) => i.status !== "resolved").length;
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-    const q = searchQuery.toLowerCase();
-    if (q.includes("event")) navigate("/events");
-    else if (q.includes("surveillance") || q.includes("camera") || q.includes("image") || q.includes("feed")) navigate("/surveillance");
-    else if (q.includes("alert")) navigate("/alerts");
-    else if (q.includes("inc")) navigate("/incidents");
-    else if (q.includes("graph")) navigate("/attack-graph");
-    else if (q.includes("mitre") || q.includes("tactic")) navigate("/mitre");
-    else if (q.includes("intel") || q.includes("ioc")) navigate("/threat-intel");
-    else if (q.includes("asset") || q.includes("server")) navigate("/assets");
-    else if (q.includes("rule")) navigate("/rules");
-    else if (q.includes("playbook")) navigate("/playbooks");
-    else if (q.includes("user") || q.includes("role")) navigate("/users");
-    else if (q.includes("audit")) navigate("/audit");
-    else navigate(`/events?search=${encodeURIComponent(searchQuery)}`);
-  };
+  // Global keyboard shortcut for Command Palette (Cmd+K / Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   return (
-    <div className="flex min-h-screen bg-bg text-ink">
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-surface md:flex select-none" aria-label="Primary">
+    <div className="flex min-h-screen bg-bg text-ink selection:bg-accent/20">
+      {/* Desktop Sidebar */}
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-surface md:flex select-none" aria-label="Primary Navigation">
         <div
           onClick={() => navigate("/")}
           className="flex h-14 items-center gap-3 border-b border-line px-4 cursor-pointer hover:bg-raised/50 transition-colors"
@@ -109,28 +122,128 @@ export default function AppShell() {
         </div>
       </aside>
 
+      {/* Mobile Drawer Backdrop & Navigation */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm md:hidden animate-fadeIn"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <aside
+            className="fixed inset-y-0 left-0 z-50 w-72 bg-surface border-r border-line flex flex-col shadow-2xl animate-slideRight"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex h-14 items-center justify-between border-b border-line px-4">
+              <div className="flex items-center gap-2.5" onClick={() => { navigate("/"); setMobileMenuOpen(false); }}>
+                <SentinelLogo size={28} />
+                <span className="font-bold text-sm tracking-wide bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                  SentinelX AI
+                </span>
+              </div>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-1 rounded-lg text-muted hover:text-ink hover:bg-raised"
+                aria-label="Close menu"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <nav className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+              {GROUPS.map((group) => (
+                <div key={group}>
+                  <p className="px-2 pb-1 text-[11px] font-medium uppercase tracking-wider text-muted/70">{group}</p>
+                  <div className="space-y-0.5">
+                    {NAV.filter((n) => n.group === group).map(({ path, label, icon: Icon }) => (
+                      <NavLink
+                        key={path}
+                        to={path}
+                        end={path === "/"}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={({ isActive }) =>
+                          clsx(
+                            "flex items-center justify-between rounded-chip px-2.5 py-2 text-xs transition-colors",
+                            isActive
+                              ? "bg-accent/15 text-accent font-medium border-l-2 border-accent"
+                              : "text-muted hover:bg-raised hover:text-ink",
+                          )
+                        }
+                      >
+                        <div className="flex items-center gap-2.5 truncate">
+                          <Icon size={16} className="shrink-0" />
+                          <span className="truncate">{label}</span>
+                        </div>
+                        {path === "/alerts" && openAlertsCount > 0 && (
+                          <span className="rounded-full bg-sev-critical/20 px-1.5 py-0.2 text-[10px] font-mono text-sev-critical">
+                            {openAlertsCount}
+                          </span>
+                        )}
+                        {path === "/incidents" && activeIncidentsCount > 0 && (
+                          <span className="rounded-full bg-sev-high/20 px-1.5 py-0.2 text-[10px] font-mono text-sev-high">
+                            {activeIncidentsCount}
+                          </span>
+                        )}
+                      </NavLink>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </nav>
+          </aside>
+        </div>
+      )}
+
+      {/* Main Content Area */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-line bg-surface/90 px-4 backdrop-blur-md">
+        {/* Sticky Header */}
+        <header className="sticky top-0 z-20 flex h-14 items-center gap-2.5 sm:gap-3 border-b border-line bg-surface/90 px-3 sm:px-4 backdrop-blur-md">
+          {/* Mobile hamburger button */}
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="md:hidden p-2 rounded-lg text-muted hover:text-ink hover:bg-raised border border-line/60"
+            aria-label="Open navigation menu"
+          >
+            <Menu size={18} />
+          </button>
+
           <DemoTag>Synthetic Security Telemetry</DemoTag>
 
-          <form onSubmit={handleSearch} className="relative ml-2 hidden max-w-md flex-1 sm:block">
-            <span className="sr-only">Search events, incidents, and assets</span>
-            <Search size={15} className="absolute left-2.5 top-2.5 text-muted pointer-events-none" aria-hidden />
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Quick jump: events, alerts, incidents, mitre, graph..."
-              className="w-full rounded-chip border border-line bg-bg py-1.5 pl-8 pr-3 text-xs placeholder:text-muted focus:border-accent focus:outline-none transition-colors font-mono"
-            />
-          </form>
+          {/* Quick Command Palette Trigger */}
+          <button
+            onClick={() => setIsPaletteOpen(true)}
+            className="relative ml-2 flex items-center justify-between max-w-sm flex-1 rounded-chip border border-line bg-bg/80 py-1.5 px-3 text-xs text-muted hover:border-accent/60 hover:text-ink transition-colors cursor-pointer"
+            title="Open Command Palette (Cmd+K / Ctrl+K)"
+          >
+            <div className="flex items-center gap-2">
+              <Search size={14} className="text-muted" />
+              <span className="truncate hidden sm:inline">Search command center, routes, tactics...</span>
+              <span className="sm:hidden">Search...</span>
+            </div>
+            <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded bg-raised border border-line px-1.5 py-0.5 text-[10px] font-mono text-muted">
+              <Command size={10} /> K
+            </kbd>
+          </button>
 
-          <div className="ml-auto flex items-center gap-2.5 text-xs">
+          <div className="ml-auto flex items-center gap-1.5 sm:gap-2.5 text-xs">
+            {/* Notifications Button */}
+            <button
+              onClick={() => navigate("/notifications")}
+              className="relative rounded-chip p-2 text-muted hover:bg-raised hover:text-ink transition-colors border border-line/60"
+              title="Notifications & SOC Alerts"
+              aria-label="Notifications"
+            >
+              <Bell size={15} />
+              {openAlertsCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-sev-critical text-[9px] font-mono text-white font-bold animate-pulse">
+                  {openAlertsCount > 9 ? "9+" : openAlertsCount}
+                </span>
+              )}
+            </button>
+
             {/* Live simulator toggle */}
             <button
               onClick={toggleSimulator}
               className={clsx(
-                "flex items-center gap-2 rounded-chip border px-2.5 py-1 text-xs font-mono transition-all",
+                "flex items-center gap-1.5 sm:gap-2 rounded-chip border px-2 sm:px-2.5 py-1 text-xs font-mono transition-all",
                 isSimulatorRunning
                   ? "border-ok/30 bg-ok/10 text-ok hover:bg-ok/20"
                   : "border-line bg-raised text-muted hover:bg-surface hover:text-ink",
@@ -140,13 +253,15 @@ export default function AppShell() {
               {isSimulatorRunning ? (
                 <>
                   <Radio size={13} className="text-ok animate-pulse" />
-                  <span className="font-medium">Simulator: LIVE</span>
+                  <span className="font-medium hidden sm:inline">Simulator: LIVE</span>
+                  <span className="font-medium sm:hidden">LIVE</span>
                   <Pause size={12} className="opacity-70" />
                 </>
               ) : (
                 <>
                   <Radio size={13} className="text-muted" />
-                  <span>Simulator: PAUSED</span>
+                  <span className="hidden sm:inline">Simulator: PAUSED</span>
+                  <span className="sm:hidden">PAUSE</span>
                   <Play size={12} className="opacity-70" />
                 </>
               )}
@@ -176,10 +291,16 @@ export default function AppShell() {
           </div>
         )}
 
-        <main className="flex-1 p-4 md:p-6 overflow-y-auto">
+        <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-y-auto">
           <Outlet />
         </main>
       </div>
+
+      {/* Global Command Palette Modal */}
+      <CommandPalette
+        isOpen={isPaletteOpen}
+        onClose={() => setIsPaletteOpen(false)}
+      />
     </div>
   );
 }

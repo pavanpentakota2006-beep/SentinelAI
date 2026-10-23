@@ -37,6 +37,37 @@ export default function MitreMatrix() {
         </div>
       </div>
 
+      {/* Vehere MITRE ATT&CK Tactical Sensor Feed */}
+      <div className="relative rounded-card border border-line bg-surface overflow-hidden shadow-md">
+        <div className="relative aspect-[21/9] sm:aspect-[24/7] max-h-48 w-full overflow-hidden bg-black/90">
+          <img
+            src="/images/mitre_attack_alert_matrix.jpg"
+            alt="Vehere MITRE ATT&CK Alert Trend & Offender Matrix"
+            className="w-full h-full object-cover object-top opacity-85"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-black/30" />
+
+          {/* Telemetry Overlays */}
+          <div className="absolute top-2.5 left-3 flex flex-wrap gap-2">
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-sev-high/20 text-sev-high border border-sev-high/40 shadow">
+              MITRE ATT&CK: 14 TACTIC KILL-CHAIN ACTIVE
+            </span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/75 text-ink border border-line/60">
+              IOC Detections: 235,563
+            </span>
+          </div>
+
+          <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-[10px] font-mono">
+            <span className="bg-black/75 text-cyan-400 px-2.5 py-0.5 rounded border border-cyan-500/30">
+              Initial Access (15) → Privilege Escalation → Lateral Movement → Exfiltration
+            </span>
+            <span className="hidden sm:inline bg-black/75 text-muted px-2 py-0.5 rounded border border-line/50">
+              Sensor: Vehere Real-Time Network Packet Inspection
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* MITRE Columns Grid */}
       <div className="overflow-x-auto pb-4 custom-scrollbar">
         <div className="flex gap-3 min-w-[1300px]">

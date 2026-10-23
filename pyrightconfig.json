@@ -1,0 +1,12 @@
+{
+  "venvPath": ".",
+  "venv": ".venv",
+  "extraPaths": [
+    "analytics-service",
+    ".venv/Lib/site-packages"
+  ],
+  "include": [
+    "analytics-service"
+  ],
+  "reportMissingImports": false
+}

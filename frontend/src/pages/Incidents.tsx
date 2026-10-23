@@ -274,9 +274,9 @@ export default function Incidents() {
 
             <div className="relative overflow-hidden rounded-chip border border-line bg-black/90 shadow-inner" style={{ height: 230 }}>
               <img
-                src="/images/soc_incidents_management.jpg"
-                alt="Network Topology"
-                className="absolute inset-0 w-full h-full object-cover opacity-50"
+                src="/images/cycarrier_apt_situation_graph.jpg"
+                alt="CyCarrier Cyber Situation Graph & Process Timeline"
+                className="absolute inset-0 w-full h-full object-cover opacity-60"
               />
               <svg width="100%" height="230" viewBox="0 0 640 230" className="absolute inset-0 select-none">
                 {/* Edges */}

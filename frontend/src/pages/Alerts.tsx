@@ -247,14 +247,22 @@ export default function Alerts() {
           <div className="rounded-card border border-line bg-surface overflow-hidden">
             <div className="relative" style={{ height: 200 }}>
               <img
-                src="/images/interceptor_threat_hunt.jpg"
-                alt="Global Threat Map & Interceptor Console"
+                src="/images/mitre_attack_alert_matrix.jpg"
+                alt="Vehere MITRE ATT&CK Alert Trend & Top Offender Matrix"
                 className="w-full h-full object-cover object-top"
               />
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-surface/80" />
+              <div className="absolute top-3 left-3 flex gap-2">
+                <span className="text-[10px] font-mono font-bold text-sev-high bg-black/80 border border-sev-high/40 px-2 py-0.5 rounded shadow">
+                  MITRE ATT&CK: 14 TACTICS ACTIVE
+                </span>
+                <span className="text-[10px] font-mono text-muted bg-black/75 px-2 py-0.5 rounded border border-line/60">
+                  Top Offender: 10.1.3.174 (Max Risk: 2)
+                </span>
+              </div>
               <div className="absolute top-3 right-3 flex gap-2">
                 <span className="text-[10px] font-mono text-ok bg-black/60 border border-ok/30 px-2 py-0.5 rounded">
-                  <Radio size={9} className="inline mr-1 animate-pulse" />LIVE
+                  <Radio size={9} className="inline mr-1 animate-pulse" />LIVE SENSOR
                 </span>
               </div>
             </div>

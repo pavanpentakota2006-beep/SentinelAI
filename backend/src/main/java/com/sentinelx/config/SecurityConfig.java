@@ -15,37 +15,35 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-/**
- * Phase 1 baseline: every route is denied except health probes and API docs.
- * JWT authentication and per-permission rules are added in Phase 2.
- */
 @Configuration
 public class SecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable) // stateless token API; revisited in Phase 2 if cookies are used
+            .csrf(AbstractHttpConfigurer::disable)
             .cors(Customizer.withDefaults())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .headers(h -> h.frameOptions(f -> f.deny()))
             .authorizeHttpRequests(a -> a
                 .requestMatchers(HttpMethod.GET, "/actuator/health/**").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                .anyRequest().denyAll());
+                .requestMatchers("/api/v1/**").permitAll()
+                .anyRequest().authenticated());
         return http.build();
     }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource(
-            @Value("${sentinelx.cors.allowed-origins}") List<String> origins) {
+            @Value("${sentinelx.cors.allowed-origins:http://localhost:5158,http://localhost:5173,http://localhost:8081}") List<String> origins) {
         CorsConfiguration cfg = new CorsConfiguration();
-        cfg.setAllowedOrigins(origins);               // explicit origins only, never "*"
-        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
-        cfg.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        cfg.setAllowedOrigins(origins);
+        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        cfg.setAllowedHeaders(List.of("*"));
+        cfg.setAllowCredentials(true);
         cfg.setMaxAge(3600L);
         UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
-        src.registerCorsConfiguration("/api/**", cfg);
+        src.registerCorsConfiguration("/**", cfg);
         return src;
     }
 }

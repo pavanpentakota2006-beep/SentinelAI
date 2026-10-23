@@ -13,12 +13,19 @@ const ATTACKS = [
   { type: "Infecting URL XSLTC &&4Agpbktc", id: "2.5\u00a0EPS", from: "China", to: "Japan", color: "text-sev-critical" },
 ];
 
-const TOP5_ORGS = [
-  { name: "Organization 1", count: 47, detail: "23 ransomware, 12 botnet, 12 exploits" },
-  { name: "Organization 2", count: 22, detail: "11 Spyware, 11 DGA" },
-  { name: "Organization 3", count: 47, detail: "23 ransomware, 23 Scanner IP, 12 exploits" },
-  { name: "Organization 4", count: 22, detail: "23 Suspicious" },
-  { name: "Organization 5", count: 9, detail: "4 Virus" },
+const ORGANIZATIONS_LIST = [
+  { name: "Global Financial Systems Corp", count: 47, detail: "23 ransomware, 12 botnet, 12 exploits" },
+  { name: "Defense Logistics Agency", count: 22, detail: "11 Spyware, 11 DGA" },
+  { name: "Apex Cloud Services", count: 47, detail: "23 ransomware, 23 Scanner IP, 12 exploits" },
+  { name: "BioHealth Pharma Labs", count: 22, detail: "23 Suspicious" },
+  { name: "Metro Grid Power & Energy", count: 19, detail: "14 Virus, 5 Exploits" },
+  { name: "Nordic Telecom AS", count: 18, detail: "9 DDoS, 9 Phishing" },
+  { name: "Trans-Pacific Shipping Lines", count: 15, detail: "15 Ingress Scans" },
+  { name: "AeroDynamics Space Tech", count: 14, detail: "7 APT29, 7 C2 Beacons" },
+  { name: "Federal Reserve Data Center", count: 12, detail: "12 Kerberos Attacks" },
+  { name: "EuroRail Transportation Ltd", count: 11, detail: "11 Credential Stuffing" },
+  { name: "Quantum Computing Lab", count: 9, detail: "4 Virus, 5 Brute Force" },
+  { name: "Pacific Semiconductor Foundry", count: 8, detail: "8 Malicious Payload" },
 ];
 
 const BREAKDOWN_BY_TYPE = [
@@ -90,6 +97,9 @@ export default function ThreatIntel() {
   const [orgFilter, setOrgFilter] = useState("All");
   const [dateRange, setDateRange] = useState("Last 24 hours");
   const [isSyncing, setIsSyncing] = useState(false);
+  const [showAllOrgs, setShowAllOrgs] = useState(false);
+  const [threatTypeFilter, setThreatTypeFilter] = useState("All");
+  const [severityFilter, setSeverityFilter] = useState("All");
 
   const KPI_CARDS = [
     { icon: "🔴", value: "12,345", label: "Total Threats", change: "", color: "bg-gradient-to-br from-red-900/30 to-red-800/10 border-red-700/30" },
@@ -243,9 +253,41 @@ export default function ThreatIntel() {
             <div className="flex items-center justify-between">
               <h2 className="text-xs font-bold text-ink">Threat Map</h2>
               <div className="flex gap-2 text-[10px] font-mono">
-                <button className="px-2 py-0.5 rounded border border-line text-muted">Date Range ↓</button>
-                <button className="px-2 py-0.5 rounded border border-line text-muted">Threat Type: All ↓</button>
-                <button className="px-2 py-0.5 rounded border border-line text-muted">Severity: All ↓</button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = dateRange === "Today" ? "Last 24 hours" : "Today";
+                    setDateRange(next);
+                    showToast({ type: "info", title: "Map Time Window", message: `Filtering map data for ${next}.` });
+                  }}
+                  className="px-2 py-0.5 rounded border border-line text-muted hover:border-accent hover:text-accent transition-colors cursor-pointer"
+                >
+                  Range: {dateRange} ↓
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const types = ["All", "Malware", "Phishing", "Exploit", "XSS"];
+                    const next = types[(types.indexOf(threatTypeFilter) + 1) % types.length];
+                    setThreatTypeFilter(next);
+                    showToast({ type: "info", title: "Threat Filter", message: `Filtering map threats by ${next}.` });
+                  }}
+                  className="px-2 py-0.5 rounded border border-line text-muted hover:border-accent hover:text-accent transition-colors cursor-pointer"
+                >
+                  Type: {threatTypeFilter} ↓
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const sevs = ["All", "Critical", "High", "Medium"];
+                    const next = sevs[(sevs.indexOf(severityFilter) + 1) % sevs.length];
+                    setSeverityFilter(next);
+                    showToast({ type: "info", title: "Severity Filter", message: `Filtering map severity by ${next}.` });
+                  }}
+                  className="px-2 py-0.5 rounded border border-line text-muted hover:border-accent hover:text-accent transition-colors cursor-pointer"
+                >
+                  Severity: {severityFilter} ↓
+                </button>
               </div>
             </div>
 
@@ -263,39 +305,57 @@ export default function ThreatIntel() {
               </div>
             </div>
 
-            {/* The actual threat map image */}
-            <div className="relative rounded-chip overflow-hidden border border-line bg-black" style={{ height: 180 }}>
+            {/* OpenCTI Threat Intelligence Observables Platform */}
+            <div className="relative rounded-chip overflow-hidden border border-line bg-black group" style={{ height: 210 }}>
               <img
-                src="/images/threat_intelligence_map.jpg"
-                alt="Global Threat Intelligence Map"
-                className="w-full h-full object-cover opacity-85"
+                src="/images/opencti_threat_intelligence.jpg"
+                alt="OpenCTI Cyber Threat Intelligence Platform"
+                className="w-full h-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-105"
               />
+              <div className="absolute top-2 left-2 flex gap-2">
+                <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-accent/20 text-accent border border-accent/40 shadow">
+                  OPENCTI OBSERVABLES: 137.9K
+                </span>
+                <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-black/70 text-ink border border-line/60">
+                  APT29 • Lazarus • Kimsuky
+                </span>
+              </div>
               {/* Legend overlay */}
-              <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-4 text-[9px] font-mono">
-                <span className="flex items-center gap-1 bg-black/60 px-2 py-0.5 rounded">
-                  <span className="h-1.5 w-1.5 rounded-full bg-red-500" /> Malware
+              <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-3 text-[9px] font-mono">
+                <span className="flex items-center gap-1 bg-black/80 px-2 py-0.5 rounded border border-line/40">
+                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" /> 503 Intrusion Sets
                 </span>
-                <span className="flex items-center gap-1 bg-black/60 px-2 py-0.5 rounded">
-                  <span className="h-1.5 w-1.5 rounded-full bg-purple-500" /> Phishing
+                <span className="flex items-center gap-1 bg-black/80 px-2 py-0.5 rounded border border-line/40">
+                  <span className="h-1.5 w-1.5 rounded-full bg-purple-400" /> 2K Malware Strains
                 </span>
-                <span className="flex items-center gap-1 bg-black/60 px-2 py-0.5 rounded">
-                  <span className="h-1.5 w-1.5 rounded-full bg-yellow-500" /> Exploit
+                <span className="flex items-center gap-1 bg-black/80 px-2 py-0.5 rounded border border-line/40">
+                  <span className="h-1.5 w-1.5 rounded-full bg-orange-400" /> Active CVEs (117)
                 </span>
               </div>
             </div>
 
-            {/* Top 5 Affected Organizations */}
+            {/* Top 5 / All 12 Affected Organizations */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-[11px] font-bold text-ink">Top 5 Affected Organization</p>
-                <button className="text-[10px] text-accent hover:underline">View All 12</button>
+                <p className="text-[11px] font-bold text-ink">
+                  {showAllOrgs ? "All 12 Monitored Organizations" : "Top 5 Affected Organizations"}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowAllOrgs(!showAllOrgs)}
+                  className="text-[10px] text-accent hover:underline cursor-pointer"
+                >
+                  {showAllOrgs ? "Collapse to Top 5" : "View All 12"}
+                </button>
               </div>
-              <div className="space-y-1.5">
-                {TOP5_ORGS.map((o, i) => (
-                  <div key={i} className="flex items-center justify-between text-[10px]">
-                    <span className="text-ink">{o.name}</span>
-                    <span className="font-mono font-bold text-sev-critical bg-sev-critical/10 px-1.5 py-0.5 rounded">{o.count}</span>
-                    <span className="text-muted text-[9px] ml-2 truncate max-w-[120px]">{o.detail}</span>
+              <div className="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+                {ORGANIZATIONS_LIST.slice(0, showAllOrgs ? 12 : 5).map((o, i) => (
+                  <div key={i} className="flex items-center justify-between text-[10px] p-1 rounded hover:bg-raised/40 transition-colors">
+                    <span className="text-ink font-medium">{o.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold text-sev-critical bg-sev-critical/10 px-1.5 py-0.5 rounded">{o.count}</span>
+                      <span className="text-muted text-[9px] truncate max-w-[120px]">{o.detail}</span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -310,15 +370,43 @@ export default function ThreatIntel() {
             <div className="flex items-center justify-between">
               <h2 className="text-xs font-bold text-ink">Threat Trends Over Time</h2>
               <div className="flex gap-1.5 text-[10px] font-mono">
-                <button className="px-2 py-0.5 rounded border border-accent text-accent bg-accent/10">Today</button>
-                <button className="px-2 py-0.5 rounded border border-line text-muted">Last 24 hours</button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDateRange("Today");
+                    showToast({ type: "info", title: "Time Filter: Today", message: "Viewing 12-hour threat trends." });
+                  }}
+                  className={clsx(
+                    "px-2.5 py-1 rounded border transition-all cursor-pointer font-medium",
+                    dateRange === "Today"
+                      ? "border-accent text-accent bg-accent/15 shadow-sm"
+                      : "border-line text-muted hover:text-ink hover:bg-raised"
+                  )}
+                >
+                  Today
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDateRange("Last 24 hours");
+                    showToast({ type: "info", title: "Time Filter: 24h", message: "Viewing 24-hour threat trends." });
+                  }}
+                  className={clsx(
+                    "px-2.5 py-1 rounded border transition-all cursor-pointer font-medium",
+                    dateRange === "Last 24 hours"
+                      ? "border-accent text-accent bg-accent/15 shadow-sm"
+                      : "border-line text-muted hover:text-ink hover:bg-raised"
+                  )}
+                >
+                  Last 24 hours
+                </button>
               </div>
             </div>
             <div className="h-[100px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={TREND_DATA.slice(0, 12)}>
+                <LineChart data={dateRange === "Today" ? TREND_DATA.slice(0, 12) : TREND_DATA}>
                   <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} />
-                  <XAxis dataKey="h" fontSize={8} stroke="rgba(255,255,255,0.3)" interval={2} />
+                  <XAxis dataKey="h" fontSize={8} stroke="rgba(255,255,255,0.3)" interval={dateRange === "Today" ? 2 : 4} />
                   <YAxis fontSize={8} stroke="rgba(255,255,255,0.3)" width={18} />
                   <Tooltip contentStyle={{ background: "rgb(var(--surface))", border: "1px solid rgb(var(--line))", borderRadius: 6, fontSize: 10 }} />
                   <Line type="monotone" dataKey="ransom" stroke="#ef4444" strokeWidth={1.5} dot={false} name="Ransomware" />

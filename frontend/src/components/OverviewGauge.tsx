@@ -160,13 +160,13 @@ export function OverviewGauge({ type, value, size = 200 }: OverviewGaugeProps) {
           </>
         )}
 
-        {/* ── 5. Dial Labels (Exact positions from Image 3) ── */}
+        {/* ── 5. Dial Labels (Perfect non-overlapping positions matching cyber_health_radar) ── */}
         {isThreat ? (
           <>
             {/* "High" on top inside the arch */}
             <text
               x={cx}
-              y={cy - 38}
+              y={cy - 44}
               textAnchor="middle"
               fill="#ffffff"
               fontSize="10"
@@ -175,14 +175,15 @@ export function OverviewGauge({ type, value, size = 200 }: OverviewGaugeProps) {
             >
               High
             </text>
-            {/* "Low" on middle-left */}
+            {/* "Low" on upper-left inside the arch, clear of arc and center number */}
             <text
-              x={cx - 40}
-              y={cy - 6}
+              x={cx - 36}
+              y={cy - 22}
               textAnchor="middle"
-              fill="rgba(255, 255, 255, 0.75)"
+              fill="rgba(255, 255, 255, 0.8)"
               fontSize="9"
               fontFamily="IBM Plex Sans, sans-serif"
+              fontWeight="500"
             >
               Low
             </text>
@@ -192,34 +193,36 @@ export function OverviewGauge({ type, value, size = 200 }: OverviewGaugeProps) {
             {/* "Normal" on top center */}
             <text
               x={cx}
-              y={cy - 40}
+              y={cy - 44}
               textAnchor="middle"
               fill="#4ade80"
               fontSize="10"
               fontFamily="IBM Plex Sans, sans-serif"
-              fontWeight="bold"
+              fontWeight="600"
             >
               Normal
             </text>
-            {/* "Warning" on left */}
+            {/* "Warning" on upper-left along cyan band, clear of arc and center number */}
             <text
-              x={cx - 42}
-              y={cy - 8}
+              x={cx - 35}
+              y={cy - 22}
               textAnchor="middle"
               fill="#38bdf8"
               fontSize="9"
               fontFamily="IBM Plex Sans, sans-serif"
+              fontWeight="500"
             >
               Warning
             </text>
-            {/* "Critical" on right */}
+            {/* "Critical" on upper-right along orange band, clear of arc, needle & center number */}
             <text
-              x={cx + 42}
-              y={cy - 8}
+              x={cx + 35}
+              y={cy - 22}
               textAnchor="middle"
               fill="#fb923c"
               fontSize="9"
               fontFamily="IBM Plex Sans, sans-serif"
+              fontWeight="500"
             >
               Critical
             </text>
@@ -243,8 +246,8 @@ export function OverviewGauge({ type, value, size = 200 }: OverviewGaugeProps) {
         {/* Center Pivot Ring (behind the text, subtle tech element) */}
         <circle
           cx={cx}
-          cy={cy + 4}
-          r={20}
+          cy={cy + 8}
+          r={18}
           fill="#060c18"
           stroke="rgba(255, 255, 255, 0.15)"
           strokeWidth="1"
@@ -253,10 +256,10 @@ export function OverviewGauge({ type, value, size = 200 }: OverviewGaugeProps) {
         {/* ── 7. Primary Bold Center Number: 76% or 92% (Image 3 Style) ── */}
         <text
           x={cx}
-          y={cy + 12}
+          y={cy + 15}
           textAnchor="middle"
           fill="#ffffff"
-          fontSize="24"
+          fontSize="22"
           fontWeight="bold"
           fontFamily="IBM Plex Sans, sans-serif"
           letterSpacing="-0.02em"
